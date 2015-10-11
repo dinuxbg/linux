@@ -444,11 +444,25 @@ static void *pru_d_da_to_va(struct pru_rproc *pru, u32 da, size_t len)
  */
 static void *pru_i_da_to_va(struct pru_rproc *pru, u32 da, size_t len)
 {
+	const u32 iram_addr_mask = ~0xfff00000u;
 	u32 offset;
 	void *va = NULL;
 
 	if (len == 0)
 		return NULL;
+
+	/*
+	 * GNU binutils do not support multiple address spaces. The
+	 * default linker script from the GNU pru-ld places IRAM at
+	 * an arbitrary high offset, in order to differentiate it
+	 * from DRAM. Hence we need to strip the artificial offset
+	 * in the IRAM addresses coming from the ELF file.
+	 *
+	 * The TI proprietary linker would never set those higher IRAM
+	 * address bits anyway. PRU architecture limits PC to a 16 bit word
+	 * address.
+	 */
+	da &= iram_addr_mask;
 
 	if (da >= PRU_IRAM_DA &&
 	    da + len <= PRU_IRAM_DA + pru->mem_regions[PRU_IOMEM_IRAM].size) {
