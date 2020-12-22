@@ -789,7 +789,7 @@
 			#address-cells = <1>;
 			#size-cells = <1>;
 			ranges = <0x0 0x300000 0x80000>;
-			status = "disabled";
+			status = "okay";
 
 			pruss: pruss@0 {
 				compatible = "ti,am3356-pruss";
@@ -807,14 +807,23 @@
 				};
 
 				pruss_cfg: cfg@26000 {
-					compatible = "syscon";
+					compatible = "ti,pruss-cfg", "syscon";
+					#address-cells = <1>;
+					#size-cells = <1>;
 					reg = <0x26000 0x2000>;
-				};
+					ranges = <0x00 0x26000 0x2000>;
 
-				pruss_iepclk_mux: iepclk-mux {
-					#clock-cells = <0>;
-					clocks = <&l3_gclk>,        /* icss_iep_gclk */
-						 <&pruss_ocp_gclk>; /* icss_ocp_gclk */
+					clocks {
+						#address-cells = <1>;
+						#size-cells = <0>;
+
+						pruss_iepclk_mux: iepclk-mux@30 {
+							reg = <0x30>;
+							#clock-cells = <0>;
+							clocks = <&l3_gclk>,        /* icss_iep */
+								<&pruss_ocp_gclk>; /* icss_ocp */
+						};
+					};
 				};
 
 				pruss_iep: iep@2e000 {
@@ -838,7 +847,7 @@
 				};
 
 				pruss_mii_rt: mii-rt@32000 {
-					compatible = "syscon";
+					compatible = "ti,pruss-mii", "syscon";
 					reg = <0x32000 0x58>;
 				};
 
